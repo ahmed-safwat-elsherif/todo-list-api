@@ -50,17 +50,22 @@ router.patch('/:_id',authenticate, (req, res, next) => {
     })
 })
 
-router.delete('/:_id',authenticate, (req, res, next) => {
-    const userId = req.signData._id;
-    const { _id } = req.params;
-    Todo.deleteOne({ _id,userId }, (error) => {
-        if (error) {
-            res.send({ error })
-            return;
-        }
-        res.status(200)
-        res.send({ message: "To-do was deleted successfully", _id })
-    })
+router.delete('/:_id',authenticate, async (req, res, next) => {
+    try {
+        const userId = req.signData._id;
+        const { _id } = req.params;
+        Todo.deleteOne({ _id,userId }, (error) => {
+            if (error) {
+                res.send({ error })
+                return;
+            }
+            res.status(200)
+            res.send({ message: "To-do was deleted successfully", _id })
+        })
+        // User.deleteOne({})
+    } catch (error) {
+        
+    }
 })
 
 module.exports = router

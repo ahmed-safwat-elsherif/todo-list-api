@@ -1,9 +1,12 @@
 const express = require('express');
 const app = express();
+const cors = require('cors')
+app.use(cors());
 require('./db-connect');
 
-const todos = require('./routes/todos')
 const users = require('./routes/users')
+const todos = require('./routes/todos')
+const todoGroups = require('./routes/todoGroups')
 
 
 app.use(express.json());
@@ -15,8 +18,9 @@ app.use((req, res, next) => {
 })
 //----------------------------------------------------------------------------------------------------
 
-app.use('/api/todos', todos)
 app.use('/api/users', users)
+app.use('/api/todos', todos)
+app.use('/api/todoGroups', todoGroups)
 
 //----------------------------------------------------------------------------------------------------
 

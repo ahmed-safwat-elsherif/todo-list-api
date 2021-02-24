@@ -1,8 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const todoSchema = new Schema({
+const todoGroupSchema = new Schema({
     userId: { type: Schema.Types.ObjectId, ref: 'User' },
-    todoGroupId: { type: Schema.Types.ObjectId, ref: 'TodoGroup' },
     title: {
         type: String,
         required: true,
@@ -11,7 +10,7 @@ const todoSchema = new Schema({
     },
     body: {
         type: String,
-        default:'This is the body of todo',
+        default:'This is the body of todo group',
         minLength: 10,
         maxlength: 500,
     },
@@ -28,6 +27,6 @@ const todoSchema = new Schema({
         default: Date.now
     }
 },{ strict: true })
-const Todo = mongoose.model('Todo', todoSchema);
+const TodoGroup = mongoose.model('TodoGroup', todoGroupSchema);
 
-module.exports = Todo
+module.exports = TodoGroup
