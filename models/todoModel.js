@@ -6,28 +6,27 @@ const todoSchema = new Schema({
     title: {
         type: String,
         required: true,
-        minLength: 10,
+        minlength: 10,
         maxlength: 20,
     },
+    inGroup:false,
     body: {
         type: String,
         default:'This is the body of todo',
-        minLength: 10,
+        minlength: 10,
         maxlength: 500,
     },
     tags: [{
         type: String,
         maxlength: 10
     }],
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now
+    status:{
+        type:String,
+        default:"in progress",
+        enum:["in progress","canceled","done"]
     }
-},{ strict: true })
+},
+{ timestamps: { createdAt: 'createdAt' } })
 const Todo = mongoose.model('Todo', todoSchema);
 
 module.exports = Todo

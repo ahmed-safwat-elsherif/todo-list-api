@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const User = require('../models/userModel')
 const Todo = require('../models/todoModel')
+const TodoGroup = require('../models/todoGroupModel')
 const bcrypt = require('bcrypt');
 const {authenticate} = require('../auth/user');
 const {validate,userValidate} = require('../validations/userValidate')
@@ -10,85 +11,101 @@ const jwt = require('jsonwebtoken');
 
 router.post('/register', async (req, res, next) => {
     try {
-        const { username, password, firstName, age } = req.body;
+        const { email, password, firstName,lastName } = req.body;
+        let isExists = await User.count({email});
+        if(isExists>0){
+            res.status(400).send({message:"This email is registered before", success:false})
+        }
         const hash = await bcrypt.hash(password, 7);
-        const user = await User.create({ username, password: hash, firstName, age })
+        const user = await User.create({ email, password: hash, firstName, lastName })
         res.statusCode = 201;
-        res.send({ user, message: { success: true } })
+        res.send({ user, message: "User registered successfully", success: true  })
     } catch (error) {
         res.statusCode = 422;
-        res.send({ error })
+        res.send({ error, message:"failed to register", success:false })
     }
 })
 
 router.post('/login',validate, async (req, res, next) => {
     try {
-        const { username, password } = req.body;
-        const user = await User.findOne({ username }).exec();
-        if (!user) throw new Error("wrong username or password");
+        const { email, password } = req.body;
+        const user = await User.findOne({ email }).exec();
+        if (!user) throw new Error("wrong email or password");
         const isMatched = await bcrypt.compare(password, user.password);
-        if (!isMatched) throw new Error("wrong username or password");
-        const latestTodos = await Todo.find({ userId:user._id }).populate('userId','username')
+        if (!isMatched) throw new Error("wrong email or password");
+        const todos = await Todo.find({ userId:user._id,inGroup:false})
+        const todoGroups = await TodoGroup.find({userId: user._id})
         const token = jwt.sign({ _id: user._id }, 'the-attack-titan');
         res.statusCode = 200;
-        res.send({ message: "logged in successfully", username: user.username,token, latestTodos })
+        let {firstName, lastName} = user;
+        res.send({ message: "logged in successfully", email,firstName,lastName,token, todos,todoGroups,success:true })
     } catch (error) {
         res.statusCode = 401;
-        res.send({error:"Invalid credentials"})
+        res.send({error:"Invalid credentials",success:false})
     }
 })
 
 router.get('/profile',authenticate, async (req,res) => {
     try {
         const _id = req.signData._id;
-        const {username, firstName, age} = await User.findOne({_id}).exec();
-        const latestTodos = await Todo.find({ userId:_id }).populate('userId','username');
-        res.status(201).send({username, firstName, age,latestTodos})
+        const {email, firstName, age} = await User.findOne({_id}).exec();
+        const todos = await Todo.find({ userId:user._id,inGroup:false})
+        const todoGroups = await TodoGroup.find({userId: user._id})
+        res.status(201).send({email,firstName,lastName,success:true, todos,todoGroups})
     } catch (error) {
-        res.status(401).send({error,message:'user not found'})
+        res.status(401).send({error,message:'user not found',success:false})
     }
 })
 
 router.route('/')
-.get(authenticate,(req, res) => {
-    User.find({ firstName: { $exists: true } }, (err, users) => {
-        if (err) {
-            res.statusCode = 400;
-            res.status(400).send({ err })
-            return;
-        }
-        res.status(200).send(users.map((user) => user.firstName))
-    })
-})
-.delete(authenticate,(req, res) => {
+.delete(authenticate,async (req, res) => {
+    try {
         const { _id } = req.signData;
-        User.deleteOne({ _id }, (error) => {
-            if (error) {
-                res.status(401)
-                res.send({ error })
-                return;
-            }
-            res.status(200);
-            res.send({ message: "user was deleted successfully", _id });
-        })
+        await User.deleteOne({ _id });
+        await Todo.deleteMany({userId:_id});
+        await TodoGroup.deleteMany({userId:_id})
+        res.status(200).send({ message: "user was deleted successfully", _id ,success:true});
+    } catch (error) {
+        res.status(401).send({ error,success:false })
+    }
 })
 .patch(authenticate,userValidate, async (req, res) => {
     const { _id } = req.signData;
+    let user = await User.findOne({_id});
+
     console.log(_id)
     const newUpdate = req.body;
-    if(newUpdate.password){
-        newUpdate.password = await bcrypt.hash(newUpdate.password, 7);
+    const isMatched = await bcrypt.compare(newUpdate.password,user.password);
+    if(!isMatched){
+        return res.status(401).send({message:"Wrong password",success:false})
     }
-
+    delete newUpdate.password;
+    console.log(newUpdate)
     User.findOneAndUpdate({ _id }, newUpdate,{
         new: true
     }, (error, user) => {
         if (error) {
-            res.send({ error })
+            res.status(400).send({ error, message:"failed to update", success:false })
             return;
         }
-        res.send({ message: "user was edited successfully", user })
+        res.status(200).send({ message: "user was edited successfully", user, success:true })
     })
 })
 
+router.patch('/change/password',authenticate,async(req,res)=>{
+    try {
+        let {_id} = req.signData;
+        let {password,newPassword} = req.body;
+        let user = await User.findOne({_id})
+        const isMatched = await bcrypt.compare(password, user.password);
+        if(!isMatched) {
+            res.status(400).send({message:"old password is not correnct", success:false})
+        }
+        password = await bcrypt.hash(newPassword,7); 
+        await User.findByIdAndUpdate({_id},{password});
+        res.status(200).send({message:"Password has changed",success:true})
+    } catch (error) {
+        res.status(404).send({message:"Cannot change password", success:false})
+    }
+})
 module.exports = router

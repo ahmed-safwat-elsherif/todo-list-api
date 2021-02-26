@@ -1,42 +1,41 @@
 const User = require('../models/userModel')
 const validate = (req, res, next) => {
-    const { username } = req.body;
-    if (typeof username !== "string") {
-        res.status(401).send({ error: "invalid username or password" })
+    const { email } = req.body;
+    if (typeof email !== "string") {
+        res.status(401).send({ error: "invalid email or password" })
         return
     }
     next();
 }
 const userValidate = (req, res, next) => {
     const user = req.body
-    if (user.username && typeof user.username !== "string") {
-        res.status(400).send({ message: 'invalid username', valid: false })
+    if (user.email && typeof user.email !== "string") {
+        res.status(400).send({ message: 'invalid email', success: false })
         return
     }
     if (user.password && typeof user.password !== "string") {
-        res.status(400).send({ message: 'invalid password', valid: false })
+        res.status(400).send({ message: 'invalid password', success: false })
         return
     }
     if (user.firstName && typeof user.firstName !== "string") {
-        res.status(400).send({ message: 'invalid first name', valid: false })
+        res.status(400).send({ message: 'invalid first name', success: false })
         return
     } else if (user.firstName) {
         if (user.firstName.length < 3 || user.firstName.length > 15) {
-            res.status(400).send({ message: 'invalid first name', valid: false })
+            res.status(400).send({ message: 'invalid first name', success: false })
             return
         }
     }
-    if (user.age && user.age < 13) {
-        res.status(400).send({ message: 'invalid age', valid: false })
-        return
-    }
-    User.findOne({ username: user.username }, (err, user) => {
+    User.findOne({ email: user.email }, (err, userInDB) => {
         if (err) {
-            res.status(400).send({ message: 'invalid age', valid: false })
+            res.status(400).send({ message: 'invalid email', success: false })
             return
         }
-        if (user) {
-            res.status(400).send({ message: 'username exists', valid: false })
+        console.log(userInDB)
+        // console.log("req:",req.signData._id,"\n","userid:",userInDB._id)
+        // console.log(req.signData._id== userInDB._id)
+        if (userInDB && userInDB._id != req.signData._id) {
+            res.status(400).send({ message: 'email registered before', success: false })
             return
         }
         next()
