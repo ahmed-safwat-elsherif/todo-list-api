@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router('mergeParams')
 const Todo = require('../models/todoModel')
 const { authenticate } = require('../auth/user');
-const {todoValidate} = require('../validations/todoValidate')
+// const {todoValidate} = require('../validations/todoValidate')
 router.route('/')
     .get(authenticate, (req, res, next) => {
         let { limit = 10, skip = 0 } = req.query;
@@ -22,7 +22,7 @@ router.route('/')
         const { _id } = req.signData
         const userId = _id;
         const { title, body, tags, status } = req.body;
-        Todo.create({ userId, title, body, tags }, function (error, todo) {
+        Todo.create({ userId, title, body, tags,status }, function (error, todo) {
             if (error) {
                 res.send({ error, message:"Failure in creating a todo", success:false })
                 return;
@@ -37,8 +37,9 @@ router.route('/:_id')
         const userId = req.signData._id;
         const { _id } = req.params;
         let newUpdate = req.body;
-        const isValid = todoValidate(newUpdate);
-        console.log(isValid)
+        // if(newUpdate.status && !["in progress","canceled","done"].includes(newUpdate.status)){
+        //     return res.status(400).send({message:"status is not valid",success:false})
+        // }
         newUpdate['updatedAt'] = Date.now();
         Todo.findOneAndUpdate({ _id,userId }, newUpdate, {
             new: true

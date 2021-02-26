@@ -9,7 +9,10 @@ const todoSchema = new Schema({
         minlength: 10,
         maxlength: 20,
     },
-    inGroup:false,
+    inGroup:{
+        type:Boolean,
+        default: false
+    },
     body: {
         type: String,
         default:'This is the body of todo',
