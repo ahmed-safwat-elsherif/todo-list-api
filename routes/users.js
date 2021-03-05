@@ -13,7 +13,7 @@ router.post('/register', async (req, res, next) => {
     try {
         const { email, password, firstName, lastName } = req.body;
         console.log({email, password, firstName, lastName})
-        let isExists = await User.count({ email });
+        let isExists = await User.countDocuments({ email });
         if (isExists > 0) {
             return res.status(400).send({ message: "Email already exists", success: false,exists:true })
         }
