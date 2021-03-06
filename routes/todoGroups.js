@@ -3,15 +3,19 @@ const router = express.Router('mergeParams')
 const Todo = require('../models/todoModel')
 const TodoGroup = require('../models/todoGroupModel')
 const { authenticate } = require('../auth/user');
-
 router.get('/', authenticate, async (req, res) => {
-    try {
-        let userId = req.signData._id;
-        let todoGroups = await TodoGroup.find({ userId })
-        res.status(200).send({ todoGroups, message: "All Todo Groups are retreived successfully", success: true })
-    } catch (error) {
-        res.status(404).send({ message: "error just happened in retreiving todo groups", error, success: false })
+    let { limit = 10, skip = 0 } = req.query;
+    const userId = req.signData._id
+    if (Number(limit) > 10) {
+        limit = 10;
     }
+    TodoGroup.find({ userId }).skip(Number(skip)).limit(Number(limit)).sort({updatedAt: -1}).exec((err, todos) => {
+        if (err) {
+            res.status(404).send({ message: "error just happened in retreiving todo groups", err, success: false })
+            return
+        }
+        res.status(200).send({ todoGroups, message: "All Todo Groups are retreived successfully", success: true })
+    });
 })
 router.post('/todogroup',authenticate, async (req, res) => {
     try {
