@@ -57,7 +57,7 @@ router.get('/profile', authenticate, async (req, res) => {
         delete user.password;
         const todos = await Todo.find({ userId: user._id, inGroup: false })
         const todoGroups = await TodoGroup.find({ userId: user._id })
-        res.status(201).send({ email, firstName, lastName, success: true, todos, todoGroups })
+        res.status(201).send({user, success: true, todos, todoGroups })
     } catch (error) {
         res.status(401).send({ error, message: 'user not found', success: false })
     }
