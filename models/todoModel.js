@@ -6,7 +6,6 @@ const todoSchema = new Schema({
     title: {
         type: String,
         required: true,
-        minlength: 10,
         maxlength: 20,
     },
     inGroup:{
@@ -16,12 +15,12 @@ const todoSchema = new Schema({
     body: {
         type: String,
         default:'This is the body of todo',
-        minlength: 10,
         maxlength: 500,
     },
     tags: [{
-        type: String,
-        maxlength: 10
+        name:{
+            type: String
+        }
     }],
     status:{
         type:String,
