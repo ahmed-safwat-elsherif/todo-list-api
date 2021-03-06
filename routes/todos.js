@@ -10,7 +10,7 @@ router.route('/')
         if (Number(limit) > 10) {
             limit = 10;
         }
-        Todo.find({ userId }).skip(Number(skip)).limit(Number(limit)).sort({updatedAt: -1}).exec((err, todos) => {
+        Todo.find({ userId, inGroup:false }).skip(Number(skip)).limit(Number(limit)).sort({updatedAt: -1}).exec((err, todos) => {
             if (err) {
                 res.status(401).send({err,message:"Failed to get the todo", success:false})
                 return
