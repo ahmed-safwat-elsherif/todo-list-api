@@ -51,7 +51,10 @@ router.post('/login', validate, async (req, res, next) => {
 router.get('/profile', authenticate, async (req, res) => {
     try {
         const _id = req.signData._id;
-        const { email, firstName, age } = await User.findOne({ _id }).exec();
+        console.log(_id)
+
+        const user = await User.findOne({ _id });
+        delete user.password;
         const todos = await Todo.find({ userId: user._id, inGroup: false })
         const todoGroups = await TodoGroup.find({ userId: user._id })
         res.status(201).send({ email, firstName, lastName, success: true, todos, todoGroups })
