@@ -9,7 +9,7 @@ router.get('/', authenticate, async (req, res) => {
     if (Number(limit) > 10) {
         limit = 10;
     }
-    TodoGroup.find({ userId }).skip(Number(skip)).limit(Number(limit)).sort({updatedAt: -1}).exec((err, todos) => {
+    TodoGroup.find({ userId }).skip(Number(skip)).limit(Number(limit)).sort({updatedAt: -1}).exec((err, todoGroups) => {
         if (err) {
             res.status(404).send({ message: "error just happened in retreiving todo groups", err, success: false })
             return
