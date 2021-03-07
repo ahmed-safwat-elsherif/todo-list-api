@@ -4,9 +4,10 @@ const Todo = require('../models/todoModel')
 const { authenticate } = require('../auth/user');
 // const {todoValidate} = require('../validations/todoValidate')
 
-router.get('/:_id',async(req,res)=>{
+router.get('/:_id',authenticate,async(req,res)=>{
     try {
         let {_id} = req.params;
+        let userId = req.signData._id;
         let todo = await Todo.findOne({_id});
         res.status(200).send({todo,success:true,message:"succeed"})
     } catch (error) {
