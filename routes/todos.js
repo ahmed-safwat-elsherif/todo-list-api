@@ -3,6 +3,16 @@ const router = express.Router('mergeParams')
 const Todo = require('../models/todoModel')
 const { authenticate } = require('../auth/user');
 // const {todoValidate} = require('../validations/todoValidate')
+
+router.get('/:_id',async(req,res)=>{
+    try {
+        let {_id} = req.params;
+        let todo = await Todo.findOne({_id});
+        res.status(200).send({todo,success:true,message:"succeed"})
+    } catch (error) {
+        res.status(400).send({error,success:false, message:"todo is retreived successfully"})
+    }
+})
 router.route('/')
     .get(authenticate, (req, res, next) => {
         let { limit = 10, skip = 0 } = req.query;
