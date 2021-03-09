@@ -54,9 +54,9 @@ router.route('/todogroup/:_id')
     .delete(authenticate, async (req, res) => {
         try {
             let userId = req.signData._id;
-            let { _id } = req.body;
-            await TodoGroup.findByIdAndDelete({ _id })
-            await Todo.findByIdAndDelete({ todoGroupId: _id })
+            let { _id } = req.params;
+            await TodoGroup.deleteOne({ _id })
+            await Todo.deleteMany({ todoGroupId: _id })
             let todoGroups = await TodoGroup.find();
             res.status(200).send({ message: "Todo group is deleted", success: true, todoGroups})
         } catch (error) {

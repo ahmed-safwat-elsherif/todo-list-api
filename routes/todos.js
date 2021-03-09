@@ -66,7 +66,7 @@ router.route('/:_id')
     .delete(authenticate, (req, res, next) => {
             const userId = req.signData._id;
             const { _id } = req.params;
-            Todo.findByIdAndDelete({ _id,userId }, (error) => {
+            Todo.deleteOne({ _id,userId }, (error) => {
                 if (error) {
                     res.send({ error,message:"Failed to delete the to-do",success:false })
                     return;
