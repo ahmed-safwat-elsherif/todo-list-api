@@ -67,9 +67,9 @@ router.route('/')
     .delete(authenticate, async (req, res) => {
         try {
             const { _id } = req.signData;
-            await User.deleteOne({ _id });
-            await Todo.deleteMany({ userId: _id });
-            await TodoGroup.deleteMany({ userId: _id })
+            await User.findByIdAndDelete({ _id });
+            await Todo.findByIdAndDelete({ userId: _id });
+            await TodoGroup.findByIdAndDelete({ userId: _id })
             res.status(200).send({ message: "user was deleted successfully", _id, success: true });
         } catch (error) {
             res.status(401).send({ error, success: false })
