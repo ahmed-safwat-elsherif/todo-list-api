@@ -51,7 +51,10 @@ router.route('/:_id')
         // if(newUpdate.status && !["in progress","canceled","done"].includes(newUpdate.status)){
         //     return res.status(400).send({message:"status is not valid",success:false})
         // }
-        newUpdate['updatedAt'] = Date.now();
+        // newUpdate['updatedAt'] = Date.now();
+        console.log(newUpdate)
+        console.log(_id)
+        console.log(userId)
         Todo.findOneAndUpdate({ _id,userId }, newUpdate, {
             new: true
         }, (error, todo) => {
